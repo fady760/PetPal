@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PetPal - Pet Adoption Tracker</title>
+  <!-- Google Fonts: Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+          },
+          colors: {
+            brand: {
+              50: '#f0fdfa',
+              100: '#ccfbf1',
+              200: '#99f6e4',
+              300: '#5eead4',
+              400: '#2dd4bf',
+              500: '#14b8a6',
+              600: '#0d9488',
+              700: '#0f766e',
+              800: '#115e59',
+              900: '#134e4a',
+            },
+            pastel: {
+              mint: '#E6F7F5',
+              softteal: '#D1F2EB',
+              peach: '#FDEBD0',
+              cream: '#FAFCFC',
+              card: '#FFFFFF',
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background: linear-gradient(135deg, #f0fdfa 0%, #f8fafc 50%, #f0fdf4 100%);
+      min-height: 100vh;
+    }
+    .card-hover {
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .card-hover:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 12px 28px -6px rgba(13, 148, 136, 0.15), 0 6px 12px -4px rgba(13, 148, 136, 0.08);
+    }
+  </style>
+</head>
+<body class="text-slate-800 antialiased flex flex-col min-h-screen">
+
+  <!-- ===================================================================== -->
+  <!-- Top Navigation & Live Health Bar                                      -->
+  <!-- ===================================================================== -->
+  <header class="sticky top-0 z-40 bg-white/90 backdrop-blur-md border-b border-teal-100 shadow-sm">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between h-16">
+        <!-- Logo -->
+        <div class="flex items-center space-x-3">
+          <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-brand-600 to-brand-400 flex items-center justify-center text-white shadow-md shadow-brand-500/20">
+            <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-2-9c-.83 0-1.5.67-1.5 1.5S9.17 14 10 14s1.5-.67 1.5-1.5S10.83 11 10 11zm4 0c-.83 0-1.5.67-1.5 1.5s.67 1.5 1.5 1.5 1.5-.67 1.5-1.5-.67-1.5-1.5-1.5zm-2 5c-1.66 0-3-1.34-3-3h6c0 1.66-1.34 3-3 3z"/>
+            </svg>
+          </div>
+          <div>
+            <span class="text-xl font-bold bg-gradient-to-r from-brand-700 to-teal-500 bg-clip-text text-transparent">PetPal</span>
+            <span class="hidden sm:inline-block ml-2 text-xs font-semibold px-2 py-0.5 rounded-full bg-brand-100 text-brand-800">DevOps Demo</span>
+          </div>
+        </div>
+
+        <!-- Health Check Status Badge (DevOps Focus) -->
+        <div class="flex items-center space-x-3">
+          <a href="/health" target="_blank" rel="noopener noreferrer" 
+             id="health-badge"
+             title="Click to view live /health JSON response"
+             class="flex items-center space-x-2 text-xs font-medium px-3 py-1.5 rounded-full bg-slate-100 hover:bg-slate-200 transition-colors border border-slate-200 text-slate-700">
+            <span class="relative flex h-2.5 w-2.5">
+              <span id="health-ping" class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+              <span id="health-dot" class="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
+            </span>
+            <span id="health-text" class="hidden sm:inline font-mono">/health: Checking...</span>
+            <span class="sm:hidden font-mono">/health</span>
+          </a>
+
+          <!-- Quick Jump to Form -->
+          <a href="#add-pet-section" 
+             class="inline-flex items-center space-x-1.5 bg-brand-600 hover:bg-brand-700 text-white text-xs sm:text-sm font-semibold px-4 py-2 rounded-xl shadow-sm shadow-brand-600/30 transition-all hover:scale-[1.02] active:scale-[0.98]">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+            </svg>
+            <span>Add Pet</span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- ===================================================================== -->
+  <!-- Hero & Statistics Section                                             -->
+  <!-- ===================================================================== -->
+  <main class="flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full">
+    <div class="mb-8">
+      <div class="flex flex-col md:flex-row md:items-end justify-between gap-4">
+        <div>
+          <h1 class="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight">
+            Find Forever <span class="text-brand-600 underline decoration-brand-200 decoration-wavy decoration-2">Homes</span>
+          </h1>
+          <p class="mt-2 text-sm sm:text-base text-slate-600 max-w-2xl">
+            Track rescued companions waiting for loving families. Lightweight, containerized, and instrumented for modern DevOps pipelines.
+          </p>
+        </div>
+
+        <!-- Quick Stats Counters -->
+        <div class="flex items-center gap-3">
+          <div class="bg-white border border-teal-100 rounded-2xl px-4 py-2.5 shadow-sm">
+            <div class="text-xs font-medium text-slate-500 uppercase tracking-wider">Available</div>
+            <div class="text-2xl font-bold text-brand-600">{{ available_count }}</div>
+          </div>
+          <div class="bg-white border border-teal-100 rounded-2xl px-4 py-2.5 shadow-sm">
+            <div class="text-xs font-medium text-slate-500 uppercase tracking-wider">Adopted</div>
+            <div class="text-2xl font-bold text-slate-700">{{ adopted_count }}</div>
+          </div>
+          <div class="bg-white border border-teal-100 rounded-2xl px-4 py-2.5 shadow-sm">
+            <div class="text-xs font-medium text-slate-500 uppercase tracking-wider">Total</div>
+            <div class="text-2xl font-bold text-slate-900">{{ total_count }}</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- =================================================================== -->
+    <!-- Add Pet Form Section (Clean, Collapsible/Inline Card)                -->
+    <!-- =================================================================== -->
+    <section id="add-pet-section" class="mb-10">
+      <div class="bg-white/80 backdrop-blur-sm border border-brand-200/80 rounded-3xl p-6 sm:p-8 shadow-sm relative overflow-hidden">
+        <div class="absolute -right-8 -top-8 w-32 h-32 bg-brand-50 rounded-full blur-2xl pointer-events-none"></div>
+
+        <div class="flex items-center justify-between mb-6">
+          <div class="flex items-center space-x-2">
+            <div class="w-8 h-8 rounded-lg bg-brand-100 text-brand-700 flex items-center justify-center font-bold text-sm">
+              🐾
+            </div>
+            <h2 class="text-lg sm:text-xl font-bold text-slate-900">Add a New Rescue Companion</h2>
+          </div>
+          <span class="text-xs text-slate-400">POST /pets</span>
+        </div>
+
+        <form action="/pets" method="POST" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <!-- Pet Name -->
+          <div>
+            <label for="name" class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1">
+              Pet Name <span class="text-red-500">*</span>
+            </label>
+            <input type="text" id="name" name="name" required placeholder="e.g. Daisy, Toby..."
+                   class="w-full px-3.5 py-2.5 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent transition-all">
+          </div>
+
+          <!-- Species -->
+          <div>
+            <label for="species" class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1">
+              Species <span class="text-red-500">*</span>
+            </label>
+            <select id="species" name="species" required
+                    class="w-full px-3.5 py-2.5 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent transition-all">
+              <option value="Dog">🐕 Dog</option>
+              <option value="Cat">🐈 Cat</option>
+              <option value="Rabbit">🐇 Rabbit</option>
+              <option value="Bird">🦜 Bird</option>
+              <option value="Other">🐾 Other</option>
+            </select>
+          </div>
+
+          <!-- Age -->
+          <div>
+            <label for="age" class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1">
+              Age (Years) <span class="text-red-500">*</span>
+            </label>
+            <input type="number" id="age" name="age" required min="0" max="30" value="1"
+                   class="w-full px-3.5 py-2.5 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent transition-all">
+          </div>
+
+          <!-- Submit Button -->
+          <div class="flex items-end">
+            <button type="submit"
+                    class="w-full bg-gradient-to-r from-brand-600 to-brand-500 hover:from-brand-700 hover:to-brand-600 text-white font-semibold py-2.5 px-4 rounded-xl shadow-md shadow-brand-500/20 hover:shadow-lg transition-all flex items-center justify-center space-x-2">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+              </svg>
+              <span>Save Pet</span>
+            </button>
+          </div>
+
+          <!-- Optional Image URL -->
+          <div class="sm:col-span-2 lg:col-span-4 mt-1">
+            <label for="image_url" class="block text-xs font-medium text-slate-500 mb-1">
+              Custom Photo URL <span class="text-slate-400 font-normal">(Optional — defaults to high quality curated species photo)</span>
+            </label>
+            <input type="url" id="image_url" name="image_url" placeholder="https://images.unsplash.com/..."
+                   class="w-full px-3.5 py-2 text-xs bg-slate-50/70 border border-slate-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent transition-all">
+          </div>
+        </form>
+      </div>
+    </section>
+
+    <!-- =================================================================== -->
+    <!-- Filter Tabs                                                         -->
+    <!-- =================================================================== -->
+    <div class="flex flex-col sm:flex-row items-center justify-between gap-4 mb-6">
+      <div class="flex items-center space-x-2 bg-slate-100/80 p-1 rounded-xl w-full sm:w-auto">
+        <button type="button" onclick="filterPets('all')" id="tab-all"
+                class="filter-tab active flex-1 sm:flex-none px-4 py-1.5 text-xs font-bold rounded-lg bg-white text-slate-800 shadow-sm transition-all">
+          All Pets ({{ total_count }})
+        </button>
+        <button type="button" onclick="filterPets('available')" id="tab-available"
+                class="filter-tab flex-1 sm:flex-none px-4 py-1.5 text-xs font-semibold rounded-lg text-slate-600 hover:text-slate-900 transition-all">
+          Looking for Homes ({{ available_count }})
+        </button>
+        <button type="button" onclick="filterPets('adopted')" id="tab-adopted"
+                class="filter-tab flex-1 sm:flex-none px-4 py-1.5 text-xs font-semibold rounded-lg text-slate-600 hover:text-slate-900 transition-all">
+          Adopted ({{ adopted_count }})
+        </button>
+      </div>
+
+      <div class="text-xs text-slate-500">
+        Showing <span id="visible-count" class="font-bold text-slate-800">{{ total_count }}</span> companions
+      </div>
+    </div>
+
+    <!-- =================================================================== -->
+    <!-- Pets Grid                                                           -->
+    <!-- =================================================================== -->
+    {% if pets %}
+    <div id="pets-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+      {% for pet in pets %}
+      <div class="pet-card card-hover bg-white rounded-2xl overflow-hidden border border-teal-100/70 shadow-sm flex flex-col"
+           data-status="{{ 'adopted' if pet.is_adopted else 'available' }}">
+        
+        <!-- Image Container -->
+        <div class="relative h-48 w-full overflow-hidden bg-slate-100">
+          <img src="{{ pet.display_image }}" 
+               alt="{{ pet.name }}" 
+               loading="lazy"
+               class="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
+               onerror="this.onerror=null;this.src='https://images.unsplash.com/photo-1543466835-00a7907e9de1?auto=format&fit=crop&w=600&q=80';">
+
+          <!-- Species Badge -->
+          <div class="absolute top-3 left-3">
+            <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold bg-white/95 backdrop-blur-sm text-slate-800 shadow-sm border border-slate-100">
+              {% if "cat" in pet.species.lower() %}
+                🐈 Cat
+              {% elif "dog" in pet.species.lower() %}
+                🐕 Dog
+              {% elif "rabbit" in pet.species.lower() %}
+                🐇 Rabbit
+              {% else %}
+                🐾 {{ pet.species }}
+              {% endif %}
+            </span>
+          </div>
+
+          <!-- Status Ribbon -->
+          <div class="absolute top-3 right-3">
+            {% if pet.is_adopted %}
+            <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold bg-rose-50 text-rose-700 border border-rose-200/80 shadow-sm">
+              ❤️ Adopted
+            </span>
+            {% else %}
+            <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200/80 shadow-sm">
+              <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 mr-1.5 animate-pulse"></span> Available
+            </span>
+            {% endif %}
+          </div>
+        </div>
+
+        <!-- Card Body -->
+        <div class="p-5 flex-1 flex flex-col justify-between">
+          <div>
+            <div class="flex items-start justify-between mb-1">
+              <h3 class="text-xl font-bold text-slate-900 leading-tight">{{ pet.name }}</h3>
+              <span class="text-xs font-semibold px-2 py-0.5 rounded-md bg-slate-100 text-slate-600">
+                {% if pet.age == 0 %}
+                  < 1 year
+                {% elif pet.age == 1 %}
+                  1 year
+                {% else %}
+                  {{ pet.age }} yrs
+                {% endif %}
+              </span>
+            </div>
+
+            <p class="text-xs text-slate-500 mb-4">
+              {% if pet.is_adopted %}
+                Found a loving family and cozy home.
+              {% else %}
+                Healthy, playful, and waiting for you!
+              {% endif %}
+            </p>
+          </div>
+
+          <!-- Action Button -->
+          <div class="pt-3 border-t border-slate-100">
+            {% if pet.is_adopted %}
+            <div class="w-full py-2.5 px-3 rounded-xl bg-slate-50 border border-slate-200 text-slate-400 text-xs font-bold text-center flex items-center justify-center space-x-1.5 cursor-not-allowed">
+              <svg class="w-4 h-4 text-rose-400" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clip-rule="evenodd" />
+              </svg>
+              <span>Happily Adopted</span>
+            </div>
+            {% else %}
+            <form action="/pets/{{ pet.id }}/adopt" method="POST" onsubmit="return confirmAdopt('{{ pet.name }}');">
+              <button type="submit" 
+                      class="w-full py-2.5 px-3 rounded-xl bg-brand-50 hover:bg-brand-600 text-brand-700 hover:text-white border border-brand-200 hover:border-transparent text-xs font-bold transition-all duration-200 flex items-center justify-center space-x-1.5 shadow-sm group">
+                <svg class="w-4 h-4 text-brand-500 group-hover:text-white transition-colors" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clip-rule="evenodd" />
+                </svg>
+                <span>Mark as Adopted</span>
+              </button>
+            </form>
+            {% endif %}
+          </div>
+        </div>
+
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
+    <!-- Empty State -->
+    <div class="text-center py-16 bg-white rounded-3xl border border-dashed border-teal-200 p-8">
+      <div class="text-5xl mb-3">🐶</div>
+      <h3 class="text-lg font-bold text-slate-800">No Pets in Tracker Yet</h3>
+      <p class="text-sm text-slate-500 max-w-sm mx-auto mt-1 mb-6">
+        Use the form above to register your first rescue animal.
+      </p>
+      <a href="#add-pet-section" class="inline-flex items-center text-xs font-bold text-brand-700 bg-brand-50 px-4 py-2 rounded-xl border border-brand-200">
+        + Add First Pet
+      </a>
+    </div>
+    {% endif %}
+
+  </main>
+
+  <!-- ===================================================================== -->
+  <!-- Footer (DevOps Metadata)                                              -->
+  <!-- ===================================================================== -->
+  <footer class="mt-auto border-t border-slate-200 bg-white/70 py-6 text-xs text-slate-500">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-3">
+      <div class="flex items-center space-x-2">
+        <span class="font-bold text-slate-700">PetPal</span>
+        <span>•</span>
+        <span>FastAPI + SQLAlchemy + Tailwind CSS</span>
+      </div>
+
+      <div class="flex items-center space-x-4">
+        <span>Endpoints:</span>
+        <a href="/" class="hover:text-brand-600 font-mono font-medium">GET /</a>
+        <a href="/pets" class="hover:text-brand-600 font-mono font-medium">POST /pets</a>
+        <a href="/health" class="hover:text-brand-600 font-mono font-medium underline">GET /health</a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ===================================================================== -->
+  <!-- Vanilla JavaScript Logic                                              -->
+  <!-- ===================================================================== -->
+  <script>
+    // Confirmation on Adopt Action
+    function confirmAdopt(petName) {
+      return confirm(`Celebrate! Mark ${petName} as officially adopted into their forever home? ❤️`);
+    }
+
+    // Client-side quick filter tabs
+    function filterPets(category) {
+      const cards = document.querySelectorAll('.pet-card');
+      let visible = 0;
+
+      cards.forEach(card => {
+        const status = card.getAttribute('data-status');
+        if (category === 'all' || status === category) {
+          card.style.display = 'flex';
+          visible++;
+        } else {
+          card.style.display = 'none';
+        }
+      });
+
+      document.getElementById('visible-count').textContent = visible;
+
+      // Update active tab styles
+      ['all', 'available', 'adopted'].forEach(tab => {
+        const btn = document.getElementById('tab-' + tab);
+        if (tab === category) {
+          btn.className = "filter-tab active flex-1 sm:flex-none px-4 py-1.5 text-xs font-bold rounded-lg bg-white text-slate-800 shadow-sm transition-all";
+        } else {
+          btn.className = "filter-tab flex-1 sm:flex-none px-4 py-1.5 text-xs font-semibold rounded-lg text-slate-600 hover:text-slate-900 transition-all";
+        }
+      });
+    }
+
+    // Dynamic Live Health Polling for DevOps Demo
+    async function checkHealth() {
+      const badge = document.getElementById('health-badge');
+      const ping = document.getElementById('health-ping');
+      const dot = document.getElementById('health-dot');
+      const text = document.getElementById('health-text');
+
+      try {
+        const response = await fetch('/health');
+        const data = await response.json();
+
+        if (response.ok && data.status === 'healthy') {
+          ping.className = "animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75";
+          dot.className = "relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500";
+          text.textContent = `DB: ${data.database || 'connected'} (200 OK)`;
+          badge.className = "flex items-center space-x-2 text-xs font-medium px-3 py-1.5 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-800 transition-colors";
+        } else {
+          throw new Error(data.error || 'Unhealthy');
+        }
+      } catch (err) {
+        ping.className = "hidden";
+        dot.className = "relative inline-flex rounded-full h-2.5 w-2.5 bg-rose-500";
+        text.textContent = `DB: disconnected`;
+        badge.className = "flex items-center space-x-2 text-xs font-medium px-3 py-1.5 rounded-full bg-rose-50 border border-rose-200 text-rose-800 transition-colors";
+      }
+    }
+
+    // Ping health immediately on load
+    document.addEventListener('DOMContentLoaded', () => {
+      checkHealth();
+      // Re-verify health every 15 seconds
+      setInterval(checkHealth, 15000);
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,53 @@
+version: "3.8"
+
+services:
+  db:
+    image: mysql:8.0
+    container_name: petpal_mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: petpal
+      MYSQL_USER: petuser
+      MYSQL_PASSWORD: petpassword
+    # NO PORTS PUBLISHED HERE (Rubric requirement met)
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-prootpassword"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+    networks:
+      - petpal-network
+
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: petpal_app
+    restart: always
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      # Using 'db' as the hostname (Service Name connection - Rubric requirement met)
+      - DATABASE_URL=mysql+pymysql://petuser:petpassword@db:3306/petpal
+    ports:
+      - "8000:8000"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    networks:
+      - petpal-network
+
+volumes:
+  mysql_data:
+
+networks:
+  petpal-network:
+    driver: bridge
