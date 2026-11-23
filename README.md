@@ -113,7 +113,7 @@ uvicorn main:app --reload --port 8000
 
 ### 1. Build the Docker Image
 ```bash
-docker build -t petpal:latest .
+docker build -t petpal:v1.0.0 .
 ```
 
 The Dockerfile implements key DevOps best practices:
@@ -144,7 +144,7 @@ docker compose up -d --build
 ```
 
 - **FastAPI Web App:** [http://localhost:8000](http://localhost:8000)
-- **MySQL Database Port:** `3306` (Root Password: `root`, DB: `petpal`)
+MySQL Database:** Internally connected (Port not exposed for security)
 
 To shut down:
 ```bash
